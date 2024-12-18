@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Tarefas</title>
+</head>
+<body>
+    <h1>Minhas Listas</h1>
+    
+    <form action="/lists" method="POST">
+        <input type="text" name="name" placeholder="Nome da nova lista" required>
+        <button type="submit">Criar Lista</button>
+    </form>
+
+    <div>
+        <% if (lists.length === 0) { %>
+            <p>Nenhuma lista encontrada.</p>
+        <% } else { %>
+            <ul>
+                <% lists.forEach(list => { %>
+                    <li>
+                        <a href="/lists/<%= list.id %>"><%= list.name %></a>
+                        <form action="/lists/<%= list.id %>/delete" method="POST" style="display: inline;">
+                            <button type="submit">Excluir</button>
+                        </form>
+                    </li>
+                <% }); %>
+            </ul>
+        <% } %>
+    </div>
+</body>
+</html>

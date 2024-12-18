@@ -1,0 +1,23 @@
+{
+  "name": "todo-list-app",
+  "version": "1.0.0",
+  "description": "To-Do List API com Node.js e Supabase",
+  "main": "app.js",
+  "scripts": {
+      "start": "node app.js",
+      "dev": "nodemon app.js"
+  },
+  "keywords": ["todo", "lista de tarefas", "supabase"],
+  "author": "Seu Nome",
+  "license": "ISC",
+  "dependencies": {
+      "@supabase/supabase-js": "^2.43.2",
+      "body-parser": "^1.20.2",
+      "dotenv": "^16.4.5",
+      "ejs": "^3.1.9",
+      "express": "^4.18.3"
+  },
+  "devDependencies": {
+      "nodemon": "^3.1.0"
+  }
+}

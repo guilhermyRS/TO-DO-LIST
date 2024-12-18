@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes da Lista: <%= list.name %></title>
+</head>
+<body>
+    <h1>Detalhes da Lista</h1>
+    <h2><%= list.name %></h2>
+    <a href="/">Voltar para todas as listas</a>
+
+    <form action="/lists/<%= list.id %>/update" method="POST">
+        <input type="text" name="name" value="<%= list.name %>" required>
+        <button type="submit">Atualizar Nome</button>
+    </form>
+
+    <h2>Tarefas</h2>
+    <% if (tasks.length === 0) { %>
+        <p>Nenhuma tarefa encontrada.</p>
+    <% } else { %>
+        <ul>
+            <% tasks.forEach(task => { %>
+                <li>
+                    <a href="/tasks/<%= task.id %>"><%= task.name %></a>
+                </li>
+            <% }); %>
+        </ul>
+    <% } %>
+
+    <form action="/tasks" method="POST">
+        <input type="hidden" name="listId" value="<%= list.id %>">
+        <input type="text" name="name" placeholder="Nova Tarefa" required>
+        <button type="submit">Adicionar Tarefa</button>
+    </form>
+</body>
+</html>

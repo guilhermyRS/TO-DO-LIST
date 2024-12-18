@@ -1,0 +1,35 @@
+<!-- Sidebar Esquerda -->
+<div id="leftSidebar" class="fixed top-0 left-0 w-64 h-full bg-blue-600 text-white transform -translate-x-full transition-transform duration-300 z-40">
+  <div class="p-4 space-y-4">
+    <button id="closeLeftSidebar" class="text-white font-bold">Fechar</button>
+    <h2 class="mt-4 text-xl">Minhas Listas</h2>
+
+    <!-- Código fornecido para exibir as listas -->
+    <div class="bg-gray-800 rounded p-6 shadow-md">
+      <% if (lists.length === 0) { %>
+          <p class="text-center text-gray-400">Nenhuma lista encontrada.</p>
+      <% } else { %>
+          <ul class="space-y-4">
+              <% lists.forEach(list => { %>
+                  <li class="flex justify-between items-center border-b border-gray-700 pb-2">
+                      <a 
+                          href="/lists/<%= list.id %>" 
+                          class="text-indigo-400 hover:underline font-medium"
+                      >
+                          <%= list.name %>
+                      </a>
+                      <form action="/lists/<%= list.id %>/delete" method="POST" class="inline">
+                          <button 
+                              type="submit" 
+                              class="px-4 py-1 bg-red-600 hover:bg-red-500 text-white font-medium rounded transition"
+                          >
+                              Excluir
+                          </button>
+                      </form>
+                  </li>
+              <% }); %>
+          </ul>
+      <% } %>
+    </div>
+  </div>
+</div>

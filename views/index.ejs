@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Tarefas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+        }
+        .column {
+            flex: 1;
+            padding: 20px;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+        }
+        .column:last-child {
+            border-right: none;
+        }
+        .column h2 {
+            margin-top: 0;
+        }
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .list-item a {
+            text-decoration: none;
+            color: #333;
+        }
+        .list-item button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .add-form {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .add-form input {
+            flex-grow: 1;
+            margin-right: 10px;
+            padding: 5px;
+        }
+        .add-form button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <!-- Coluna Esquerda: Listas -->
+    <div class="column">
+        <h2>Listas de Tarefas</h2>
+        
+        <form class="add-form" action="/lists" method="POST">
+            <input type="text" name="name" placeholder="Nova Lista" required>
+            <button type="submit">+</button>
+        </form>
+
+        <div id="lists">
+            <% if (locals.lists && lists.length > 0) { %>
+                <% lists.forEach(list => { %>
+                    <div class="list-item">
+                        <a href="#" onclick="selectList('<%= list.id %>')"><%= list.name %></a>
+                        <form action="/lists/<%= list.id %>/delete" method="POST">
+                            <button type="submit">✖</button>
+                        </form>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <p>Nenhuma lista criada</p>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Coluna Central: Tarefas -->
+    <div class="column">
+        <h2>Tarefas</h2>
+        
+        <form id="task-form" class="add-form" action="/tasks" method="POST" style="display: none;">
+            <input type="hidden" id="list-id-input" name="listId">
+            <input type="text" name="name" placeholder="Nova Tarefa" required>
+            <button type="submit">+</button>
+        </form>
+
+        <div id="tasks">
+            <p>Selecione uma lista para ver as tarefas</p>
+        </div>
+    </div>
+
+    <!-- Coluna Direita: Etapas -->
+    <div class="column">
+        <h2>Etapas</h2>
+        
+        <form id="step-form" class="add-form" action="/steps" method="POST" style="display: none;">
+            <input type="hidden" id="task-id-input" name="taskId">
+            <input type="text" name="name" placeholder="Nova Etapa" required>
+            <button type="submit">+</button>
+        </form>
+
+        <div id="steps">
+            <p>Selecione uma tarefa para ver as etapas</p>
+        </div>
+    </div>
+
+    <script>
+        function selectList(listId) {
+            // Mostrar formulário de tarefa
+            document.getElementById('task-form').style.display = 'flex';
+            document.getElementById('list-id-input').value = listId;
+
+            // Buscar tarefas dessa lista via fetch
+            fetch(`/api/lists/${listId}/tasks`)
+                .then(response => response.json())
+                .then(tasks => {
+                    const tasksDiv = document.getElementById('tasks');
+                    tasksDiv.innerHTML = ''; // Limpar tarefas anteriores
+
+                    if (tasks.length === 0) {
+                        tasksDiv.innerHTML = '<p>Nenhuma tarefa nesta lista</p>';
+                        return;
+                    }
+
+                    tasks.forEach(task => {
+                        const taskDiv = document.createElement('div');
+                        taskDiv.classList.add('list-item');
+                        taskDiv.innerHTML = `
+                            <a href="#" onclick="selectTask('${task.id}')">
+                                ${task.name} 
+                                <span>(${task.progress || 0}%)</span>
+                                ${task.is_completed ? '✓' : ''}
+                            </a>
+                            <form action="/tasks/${task.id}/delete" method="POST">
+                                <button type="submit">✖</button>
+                            </form>
+                        `;
+                        tasksDiv.appendChild(taskDiv);
+                    });
+                });
+        }
+
+        function selectTask(taskId) {
+            // Mostrar formulário de etapa
+            document.getElementById('step-form').style.display = 'flex';
+            document.getElementById('task-id-input').value = taskId;
+
+            // Buscar etapas dessa tarefa via fetch
+            fetch(`/api/tasks/${taskId}/steps`)
+                .then(response => response.json())
+                .then(steps => {
+                    const stepsDiv = document.getElementById('steps');
+                    stepsDiv.innerHTML = ''; // Limpar etapas anteriores
+
+                    if (steps.length === 0) {
+                        stepsDiv.innerHTML = '<p>Nenhuma etapa nesta tarefa</p>';
+                        return;
+                    }
+
+                    steps.forEach(step => {
+                        const stepDiv = document.createElement('div');
+                        stepDiv.classList.add('list-item');
+                        stepDiv.innerHTML = `
+                            <label>
+                                <input 
+                                    type="checkbox" 
+                                    onchange="toggleStep('${step.id}')"
+                                    ${step.is_completed ? 'checked' : ''}
+                                >
+                                ${step.name}
+                            </label>
+                            <form action="/steps/${step.id}/delete" method="POST">
+                                <button type="submit">✖</button>
+                            </form>
+                        `;
+                        stepsDiv.appendChild(stepDiv);
+                    });
+                });
+        }
+
+        function toggleStep(stepId) {
+            fetch(`/steps/${stepId}/toggle`, { method: 'POST' })
+                .then(response => {
+                    // Você pode adicionar lógica de atualização aqui se necessário
+                });
+        }
+    </script>
+</body>
+</html>

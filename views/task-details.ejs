@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes da Tarefa: <%= task.name %></title>
+</head>
+<body>
+    <h1><%= task.name %></h1>
+    <p><%= task.description || 'Sem descrição' %></p>
+    
+    <form action="/tasks/<%= task.id %>/update" method="POST">
+        <input type="text" name="name" value="<%= task.name %>" required>
+        <input type="text" name="description" value="<%= task.description || '' %>">
+        <button type="submit">Atualizar Tarefa</button>
+    </form>
+
+    <form action="/tasks/<%= task.id %>/toggle" method="POST">
+        <button type="submit">
+            <%= task.is_completed ? 'Desmarcar Tarefa' : 'Marcar como Concluída' %>
+        </button>
+    </form>
+
+    <p>Progresso: <%= formatProgress(task.progress) %>%</p>
+
+    <h2>Adicionar Etapa</h2>
+    <form action="/steps" method="POST">
+        <input type="hidden" name="taskId" value="<%= task.id %>">
+        <input type="text" name="name" placeholder="Nome da etapa" required>
+        <button type="submit">Adicionar Etapa</button>
+    </form>
+
+    <h2>Etapas</h2>
+    <% if (steps.length === 0) { %>
+        <p>Nenhuma etapa encontrada.</p>
+    <% } else { %>
+        <ul>
+            <% steps.forEach(step => { %>
+                <li>
+                    <form action="/steps/<%= step.id %>/toggle" method="POST" style="display: inline;">
+                        <input 
+                            type="checkbox" 
+                            <%= step.is_completed ? 'checked' : '' %> 
+                            onchange="this.form.submit()"
+                        >
+                        <%= step.name %>
+                    </form>
+                    <form action="/steps/<%= step.id %>/delete" method="POST" style="display: inline;">
+                        <button type="submit">Excluir</button>
+                    </form>
+                </li>
+            <% }); %>
+        </ul>
+    <% } %>
+
+    <a href="/lists/<%= task.list_id %>">Voltar para Lista</a>
+</body>
+</html>
